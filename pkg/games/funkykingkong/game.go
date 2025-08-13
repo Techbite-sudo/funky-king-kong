@@ -56,8 +56,8 @@ var AllSymbols = []Symbol{
 	Symbol1BAR,
 }
 
-// ValidBetMultipliers contains valid bet multiplier values
-var ValidBetMultipliers = []int{1, 2, 3}
+// ValidBetLevels contains valid bet level values
+var ValidBetLevels = []int{1, 2, 3}
 
 // GenerateWinningReels generates reels that guarantee a win
 func GenerateWinningReels() []string {
@@ -121,7 +121,7 @@ func GenerateLosingReels() []string {
 
 // CalculateWin determines the win amount and winning combination
 // Only considers actual symbols, ignores EMPTY positions
-func CalculateWin(reels []string, betMultiplier int, internalMultiplier int) (float64, string) {
+func CalculateWin(reels []string, betLevel int, internalMultiplier int) (float64, string) {
 	// Filter out empty positions
 	actualSymbols := []string{}
 	for _, symbol := range reels {
@@ -139,7 +139,7 @@ func CalculateWin(reels []string, betMultiplier int, internalMultiplier int) (fl
 	if actualSymbols[0] == actualSymbols[1] && actualSymbols[1] == actualSymbols[2] {
 		combinationKey := fmt.Sprintf("%s %s %s", actualSymbols[0], actualSymbols[1], actualSymbols[2])
 		if payout, exists := Paytable[combinationKey]; exists {
-			winAmount := float64(payout[betMultiplier-1]*internalMultiplier) * 0.01
+			winAmount := float64(payout[betLevel-1]*internalMultiplier) * 0.01
 			return winAmount, combinationKey
 		}
 	}
@@ -147,7 +147,7 @@ func CalculateWin(reels []string, betMultiplier int, internalMultiplier int) (fl
 	// Check for ANY 3X BAR (any combination of BAR symbols, all 3 must be different BARs)
 	if isAnyBarCombination(actualSymbols) {
 		payout := Paytable["ANY_3X_BAR"]
-		winAmount := float64(payout[betMultiplier-1]*internalMultiplier) * 0.01
+		winAmount := float64(payout[betLevel-1]*internalMultiplier) * 0.01
 		return winAmount, "ANY 3X BAR"
 	}
 
@@ -178,28 +178,28 @@ func isAnyBarCombination(reels []string) bool {
 	return true
 }
 
-// ValidateBetAmount checks if the bet amount is valid for the given bet multiplier
-func ValidateBetAmount(betAmount float64, betMultiplier int) bool {
-	if multiplierMap, exists := BetAmountToMultiplier[betMultiplier]; exists {
+// ValidateBetAmount checks if the bet amount is valid for the given bet level
+func ValidateBetAmount(betAmount float64, betLevel int) bool {
+	if multiplierMap, exists := BetAmountToMultiplier[betLevel]; exists {
 		_, valid := multiplierMap[betAmount]
 		return valid
 	}
 	return false
 }
 
-// ValidateBetMultiplier checks if the bet multiplier is valid
-func ValidateBetMultiplier(betMultiplier int) bool {
-	for _, valid := range ValidBetMultipliers {
-		if betMultiplier == valid {
+// ValidateBetLevel checks if the bet level is valid
+func ValidateBetLevel(betLevel int) bool {
+	for _, valid := range ValidBetLevels {
+		if betLevel == valid {
 			return true
 		}
 	}
 	return false
 }
 
-// GetInternalMultiplier gets the internal multiplier for the bet amount and bet multiplier
-func GetInternalMultiplier(betAmount float64, betMultiplier int) int {
-	if multiplierMap, exists := BetAmountToMultiplier[betMultiplier]; exists {
+// GetInternalMultiplier gets the internal multiplier for the bet amount and bet level
+func GetInternalMultiplier(betAmount float64, betLevel int) int {
+	if multiplierMap, exists := BetAmountToMultiplier[betLevel]; exists {
 		if multiplier, exists := multiplierMap[betAmount]; exists {
 			return multiplier
 		}
@@ -207,10 +207,10 @@ func GetInternalMultiplier(betAmount float64, betMultiplier int) int {
 	return 1 // Default fallback
 }
 
-// GetValidBetAmounts returns all valid bet amounts for a given bet multiplier
-func GetValidBetAmounts(betMultiplier int) []float64 {
+// GetValidBetAmounts returns all valid bet amounts for a given bet level
+func GetValidBetAmounts(betLevel int) []float64 {
 	var amounts []float64
-	if multiplierMap, exists := BetAmountToMultiplier[betMultiplier]; exists {
+	if multiplierMap, exists := BetAmountToMultiplier[betLevel]; exists {
 		for amount := range multiplierMap {
 			amounts = append(amounts, amount)
 		}

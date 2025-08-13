@@ -1,242 +1,212 @@
-# Crazy King Kong Game
+# Funky King Kong Slot Machine Game
 
-A boulder-crushing multiplier game featuring King Kong where players select boulders for Kong to crush. Each crush attempt is a bet - if the boulder doesn't break, the player loses their bet and Kong tries again. When the boulder finally breaks, the player wins based on the revealed multiplier.
+A tropical-themed slot machine game featuring King Kong where players spin three reels to match symbols and win based on the selected paytable level. The game features a unique "Bet One" button that cycles through three different paytable levels (x1, x2, x3) with increasing payouts and corresponding bet amounts.
 
 ## Game Overview
 
-Crazy King Kong is a progressive crushing game where:
-1. **Player selects boulder type** and places bet
-2. **Kong attempts to crush** the selected boulder
-3. **Each crush attempt = 1 bet** (player loses bet if boulder doesn't break)
-4. **Boulder breaks = Win** (multiplier revealed, proceed to next boulder)
-5. **Boulder doesn't break = Loss** (try crushing same boulder again)
-6. **Bonus rounds** randomly triggered when boulders break
+Funky King Kong is a classic 3-reel slot machine where:
+1. **Player selects bet level** (x1, x2, or x3) using the "Bet One" button
+2. **Player chooses bet amount** from available options for the selected level
+3. **Player spins the reels** to match symbols across the payline
+4. **Winning combinations** pay out based on the selected paytable level
+5. **RNG determines** whether the spin results in a win or loss
+6. **Single payline** with adjacent reel matching from left to right
 
 ## Game Mechanics
 
-### Core Crushing System
-- **RNG Determines Breaking**: External RNG service decides if boulder breaks
-- **Progressive Attempts**: Same boulder until it breaks, each attempt costs a bet
-- **No State Management**: Backend is stateless, Unity handles boulder progression
-- **Win Only on Break**: Multiplier only revealed and paid when boulder breaks
+### Core Slot System
+- **3-Reel Layout**: Three reels with various tropical symbols
+- **Single Payline**: Center horizontal line for winning combinations
+- **Adjacent Matching**: Symbols must match on adjacent reels starting from leftmost
+- **RNG Determines Outcome**: External RNG service decides win/loss
+- **Stateless Design**: Each spin is independent, no session management
 
-### Boulder Breaking Logic
-- **RNG "Win"** → Boulder breaks → Reveal multiplier → Player wins
-- **RNG "Loss"** → Boulder doesn't break → Player loses bet → Try again
+### Bet Level Cycling
+- **"Bet One" Button**: Cycles through three paytable levels
+- **Level Progression**: x1 → x2 → x3 → x1 (cycles back to x1)
+- **Increasing Payouts**: Higher levels offer better payouts for same symbols
+- **Corresponding Bet Amounts**: Each level has specific valid bet amounts
 
-## Boulder Types & Multipliers
+### Winning Logic
+- **RNG "Win"** → Generate winning symbol combination → Pay out
+- **RNG "Loss"** → Generate losing symbol combination → No payout
 
-| Boulder Type | Multiplier Range | Risk Level | Description |
-|-------------|------------------|------------|-------------|
-| **Gold Boulder** | 1.5x ~ 100x | Highest | Hardest to break, highest rewards |
-| **Blue Boulder** | 1.4x ~ 50x | High | Good balance of difficulty/reward |
-| **Red Boulder** | 1.3x ~ 20x | Medium | Moderate difficulty and rewards |
-| **White Boulder** | 1.2x ~ 10x | Lowest | Easiest to break, lower rewards |
+## Symbol Types & Payouts
 
-*Note: Breaking difficulty is controlled by RNG service based on player RTP, not fixed probabilities*
+### Paytable Structure (3 Levels)
+Each symbol combination has three payout values corresponding to the three bet levels:
 
-## Bonus Game Features
+| Symbol Combination | Level x1 | Level x2 | Level x3 | Description |
+|-------------------|----------|----------|----------|-------------|
+| **Kong Kong Kong** | 800 | 1600 | 2500 | Three King Kong symbols |
+| **Sun Sun Sun** | 400 | 800 | 1200 | Three sun symbols |
+| **Palm Palm Palm** | 200 | 400 | 600 | Three palm tree symbols |
+| **Coconut Coconut Coconut** | 100 | 200 | 300 | Three coconut symbols |
+| **Banana Banana Banana** | 80 | 160 | 240 | Three banana symbols |
+| **3BAR 3BAR 3BAR** | 60 | 120 | 180 | Three 3BAR symbols |
+| **2BAR 2BAR 2BAR** | 40 | 80 | 120 | Three 2BAR symbols |
+| **1BAR 1BAR 1BAR** | 20 | 40 | 60 | Three 1BAR symbols |
+| **ANY 3X BAR** | 10 | 20 | 30 | Any combination of three BAR symbols |
 
-### Trigger Conditions
-- **Triggers when boulder breaks** (RNG win outcome)
-- **10% chance** on successful boulder crush
-- **Stone selection** from 3 randomly presented options
-- **Bet amount locked** during bonus round
-
-### Bonus Stone Types & Multipliers
-
-| Stone Type | Multiplier Range | Description |
-|-----------|------------------|-------------|
-| **Gold Stone** | 28x ~ 888x | Variable high multipliers |
-| **Silver Stone** | 18x (Fixed) | Consistent medium multiplier |
-| **Bronze Stone** | 8x (Fixed) | Guaranteed lower multiplier |
+### Symbol Types
+- **High Value**: Kong (highest paying symbol)
+- **Medium Value**: Sun, Palm, Coconut, Banana
+- **Low Value**: 3BAR, 2BAR, 1BAR
+- **Special**: ANY 3X BAR (any mix of BAR symbols)
 
 ## Betting Options
 
-**Available Bet Amounts**: 0.5, 1, 2, 4, 5, 10, 20, 25, 50, 100 credits
+### Bet Level 1 (x1)
+**Available Bet Amounts**: 0.01, 0.05, 0.1, 0.2, 0.25 credits
+**Internal Multipliers**: 1, 5, 10, 20, 25
 
-**Payout Calculation**: `Win Amount = Bet Amount × Revealed Multiplier`
+### Bet Level 2 (x2)
+**Available Bet Amounts**: 0.02, 0.1, 0.2, 0.4, 0.5 credits
+**Internal Multipliers**: 1, 5, 10, 20, 25
+
+### Bet Level 3 (x3)
+**Available Bet Amounts**: 0.03, 0.15, 0.3, 0.6, 0.75 credits
+**Internal Multipliers**: 1, 5, 10, 20, 25
+
+**Payout Calculation**: `Win Amount = (Paytable Value × Internal Multiplier) × 0.01`
 
 ## API Endpoints
 
-### Main Game - Boulder Crushing
+### Main Game - Slot Spin
 
-**Endpoint**: `POST /crush/crazykingkong`
-
-#### Request Body
-```json
-{
-  "client_id": "1",
-  "game_id": "45",
-  "player_id": "22",
-  "bet_id": "unique_per_crush_attempt",
-  "bet_amount": 5.0,
-  "boulder_type": "gold"
-}
-```
-
-#### Response - Boulder Doesn't Break (RNG Loss)
-```json
-{
-  "status": "success",
-  "message": "Boulder didn't break, try again!",
-  "boulder_type": "gold",
-  "boulder_broken": false,
-  "multiplier": 0,
-  "win_amount": 0,
-  "bonus_triggered": false
-}
-```
-
-#### Response - Boulder Breaks (RNG Win)
-```json
-{
-  "status": "success",
-  "message": "Boulder crushed! Choose next boulder.",
-  "boulder_type": "gold",
-  "boulder_broken": true,
-  "multiplier": 25.6,
-  "win_amount": 128.0,
-  "bonus_triggered": false
-}
-```
-
-#### Response - Boulder Breaks + Bonus Triggered
-```json
-{
-  "status": "success",
-  "message": "Boulder crushed! Bonus game triggered - choose a stone!",
-  "boulder_type": "gold", 
-  "boulder_broken": true,
-  "multiplier": 25.6,
-  "win_amount": 128.0,
-  "bonus_triggered": true,
-  "available_stones": [
-    {
-      "type": "gold",
-      "display_name": "gold stone"
-    },
-    {
-      "type": "silver",
-      "display_name": "silver stone"
-    },
-    {
-      "type": "bronze",
-      "display_name": "bronze stone"
-    }
-  ]
-}
-```
-
-### Bonus Game - Stone Selection
-
-**Endpoint**: `POST /bonus/crazykingkong`
+**Endpoint**: `POST /spin/funkykingkong`
 
 #### Request Body
 ```json
 {
   "client_id": "1",
-  "game_id": "45",
+  "game_id": "funkykingkong",
   "player_id": "22",
-  "bet_id": "bonus_unique_id",
-  "bet_amount": 5.0,
-  "stone_type": "gold"
+  "bet_id": "unique_per_spin",
+  "bet_amount": 0.1,
+  "bet_level": 1
 }
 ```
 
-#### Response Body
+#### Response - Winning Spin
 ```json
 {
   "status": "success",
-  "message": "Bonus stone revealed!",
-  "stone_type": "gold",
-  "multiplier": 156.0,
-  "win_amount": 780.0
+  "message": "",
+  "reels": ["Kong", "Kong", "Kong"],
+  "win_amount": 8.0,
+  "winning_combination": "Kong Kong Kong",
+  "paytable_used": 1,
+  "bet_level": 1
+}
+```
+
+#### Response - Losing Spin
+```json
+{
+  "status": "success",
+  "message": "",
+  "reels": ["Kong", "Sun", "Palm"],
+  "win_amount": 0.0,
+  "winning_combination": "",
+  "paytable_used": 1,
+  "bet_level": 1
+}
+```
+
+#### Response - ANY 3X BAR Win
+```json
+{
+  "status": "success",
+  "message": "",
+  "reels": ["1BAR", "2BAR", "3BAR"],
+  "win_amount": 0.1,
+  "winning_combination": "ANY 3X BAR",
+  "paytable_used": 1,
+  "bet_level": 1
 }
 ```
 
 ## Game Flow
 
-### Standard Crushing Flow
-1. **Player Selection**: Choose boulder type and bet amount in Unity
-2. **Crush Attempt**: Unity calls `/crush/crazykingkong` API
-3. **RNG Decision**: Backend calls RNG service to determine outcome
-4. **Boulder Doesn't Break**: 
-   - Unity shows failed crush animation
-   - Player loses bet amount
-   - Same boulder remains for next attempt
-5. **Boulder Breaks**:
-   - Unity shows successful crush animation
-   - Multiplier revealed and paid
-   - Unity moves to next boulder selection
-   - Possible bonus game trigger
-
-### Bonus Game Flow
-1. **Bonus Trigger**: When boulder breaks, 10% chance for bonus
-2. **Stone Presentation**: Unity displays 3 available stones
-3. **Player Choice**: Select one stone type
-4. **Stone Reveal**: Backend processes bonus with RNG validation
-5. **Bonus Payout**: Additional win amount based on stone multiplier
+### Standard Spin Flow
+1. **Bet Level Selection**: Player clicks "Bet One" to cycle through x1, x2, x3
+2. **Bet Amount Selection**: Player chooses valid bet amount for current level
+3. **Spin Initiation**: Unity calls `/spin/funkykingkong` API
+4. **RNG Decision**: Backend calls RNG service to determine outcome
+5. **Reel Generation**: 
+   - **Win**: Generate winning symbol combination
+   - **Loss**: Generate losing symbol combination
+6. **Result Display**: Unity shows final reel positions and payout
 
 ### Client (Unity) Responsibilities
-- **Boulder State**: Track which boulder is currently being crushed
-- **Attempt Counter**: Count crush attempts for UI feedback
-- **Animation Management**: Show crush attempts, successes, failures
-- **Boulder Progression**: Move to next boulder after successful break
-- **Bonus Flow**: Handle bonus stone selection and animations
+- **Bet Level Cycling**: Handle "Bet One" button to cycle through paytables
+- **Bet Amount Validation**: Show only valid amounts for current level
+- **Reel Animation**: Display spinning animation and final positions
+- **Win/Loss Display**: Show appropriate animations and payouts
+- **Paytable Display**: Update visible paytable based on current level
 
 ### Backend Responsibilities
-- **Stateless Processing**: Each API call is independent
-- **RNG Integration**: Determine break/no-break outcomes
-- **Multiplier Generation**: Create fair weighted multipliers
-- **Bonus Triggers**: Random bonus game activation
-- **Validation**: Ensure all inputs are valid
+- **Stateless Processing**: Each spin is independent
+- **RNG Integration**: Determine win/loss outcomes based on RTP
+- **Symbol Generation**: Create appropriate winning or losing combinations
+- **Validation**: Ensure bet amounts match selected level
+- **Payout Calculation**: Calculate correct win amounts
 
 ## Technical Implementation
 
-### Breaking Determination
+### Win Determination
 ```go
-// Generate potential multiplier for boulder type
-multiplier := GenerateBoulderMultiplier(boulderType)
-potentialWin := betAmount * multiplier
+// Generate potential winning combination
+winningReels := GenerateWinningReels()
+potentialWin, winCombination := CalculateWin(winningReels, betLevel, internalMultiplier)
 
-// Let RNG service decide if boulder breaks
+// Calculate payout multiplier for RNG
+payoutMultiplier := potentialWin / betAmount
+
+// Let RNG service decide outcome
 rngResponse := rngClient.GetOutcome(...)
 
 if rngResponse.PrefOutcome == "win" {
-    // Boulder breaks - reveal multiplier and pay
-    boulderBroken = true
-    winAmount = potentialWin
+    // Use winning combination
+    finalReels = winningReels
+    finalWinAmount = potentialWin
 } else {
-    // Boulder doesn't break - player loses bet
-    boulderBroken = false
-    winAmount = 0
+    // Use losing combination
+    finalReels = GenerateLosingReels()
+    finalWinAmount = 0
 }
 ```
 
-### Multiplier Generation Algorithm
-**Boulder Multipliers**: Uses exponential distribution favoring lower multipliers
-```go
-exponentialValue := 1.0 - (randomValue * randomValue * randomValue)
-multiplier := min + (exponentialValue * (max - min))
-```
+### Symbol Generation Algorithm
+**Winning Combinations**: Pre-defined winning symbol sets
+- Exact matches: Three identical symbols
+- ANY 3X BAR: Any combination of three different BAR symbols
 
-**Stone Multipliers**: 
-- Gold stones: Weighted distribution (28x-888x)
-- Silver/Bronze: Fixed multipliers (18x/8x)
+**Losing Combinations**: Various non-winning combinations
+- Different symbols: No matching symbols
+- Partial matches: Two same + one different
+- Empty positions: Symbols with empty spaces
 
 ### RNG Integration Flow
 1. **Generate Potential Outcome**: Calculate what player could win
 2. **RNG Validation**: External service determines actual outcome based on RTP
 3. **Apply Result**: 
-   - **Win**: Use generated multiplier, boulder breaks
-   - **Loss**: No multiplier, boulder doesn't break
+   - **Win**: Use generated winning combination
+   - **Loss**: Use generated losing combination
 
-### Error Handling & Validation
-- **Request Validation**: Required fields, valid bet amounts, valid boulder/stone types
-- **RNG Service Integration**: Graceful handling of external service failures
-- **Settings Service**: Player RTP retrieval with retry logic
-- **Comprehensive Logging**: All outcomes logged for monitoring
+### Bet Level Validation
+```go
+// Validate bet level (1, 2, or 3)
+if !ValidateBetLevel(req.BetLevel) {
+    return error("Invalid bet level")
+}
+
+// Validate bet amount for selected level
+if !ValidateBetAmount(req.BetAmount, req.BetLevel) {
+    return error("Invalid bet amount for level")
+}
+```
 
 ## Configuration
 
@@ -252,7 +222,7 @@ TEST_SETTINGS_API_URL=https://t3.ibibe.africa/get-game-settings
 
 # Server Configuration
 PORT=11401
-LOG_FILE=crazykingkong.log
+LOG_FILE=funkykingkong.log
 ```
 
 ### Client Selection Logic
@@ -262,15 +232,15 @@ LOG_FILE=crazykingkong.log
 ## File Structure
 
 ```
-cmd/crazykingkong/
+cmd/funkykingkong/
 ├── main.go                 # Main application entry point
 
-pkg/games/crazykingkong/
+pkg/games/funkykingkong/
 ├── types.go               # Request/response structures
-├── game.go                # Core game logic and multiplier generation
-├── handlers.go            # HTTP handlers for crush and bonus endpoints
+├── game.go                # Core game logic and symbol generation
+├── handlers.go            # HTTP handlers for spin endpoint
 ├── routes.go              # Route registration and client selection
-└── README.md              # This documentation
+└── utils.go               # Utility functions
 
 pkg/common/
 ├── config/config.go       # Environment configuration (shared)
@@ -280,19 +250,17 @@ pkg/common/
 
 ## Game Balance Configuration
 
-### Bonus Trigger Rate
-**Current**: 10% chance when boulder breaks
-**Adjustment**: Modify `ShouldTriggerBonus()` function
+### Paytable Adjustments
+**Current**: Three-tier system with x1, x2, x3 multipliers
+**Modification**: Edit `Paytable` map in `game.go`
 
-### Multiplier Distribution
-**Current**: Exponential curves favor lower multipliers
-**Adjustment**: Modify exponential power in generation functions
-- **More Conservative**: Increase power (favor lower multipliers)
-- **More Aggressive**: Decrease power (favor higher multipliers)
+### Bet Amount Ranges
+**Current**: Scaled amounts for each level
+**Modification**: Edit `BetAmountToMultiplier` map
 
-### Boulder Risk Profiles
-**Current**: Gold hardest/highest, White easiest/lowest
-**Adjustment**: Modify ranges in `BoulderMultipliers` map
+### Symbol Distribution
+**Current**: Balanced mix of high/medium/low value symbols
+**Modification**: Adjust `GenerateWinningReels()` and `GenerateLosingReels()`
 
 ## Development & Testing
 
@@ -302,71 +270,109 @@ pkg/common/
 cp .env.example .env
 
 # Run the application
-go run cmd/crazykingkong/main.go
+go run cmd/funkykingkong/main.go
 ```
 
-### Testing Boulder Crushing
+### Testing Slot Spins
 ```bash
-# Test successful boulder break
-curl -X POST http://localhost:11401/crush/crazykingkong \
+# Test winning spin with level 1
+curl -X POST http://localhost:11401/spin/funkykingkong \
   -H "Content-Type: application/json" \
   -d '{
     "client_id": "1",
-    "game_id": "45",
+    "game_id": "funkykingkong",
     "player_id": "test123",
-    "bet_id": "bet123",
-    "bet_amount": 1.0,
-    "boulder_type": "gold"
+    "bet_id": "spin123",
+    "bet_amount": 0.1,
+    "bet_level": 1
   }'
 
-# Test bonus game
-curl -X POST http://localhost:11401/bonus/crazykingkong \
+# Test level 2 spin
+curl -X POST http://localhost:11401/spin/funkykingkong \
   -H "Content-Type: application/json" \
   -d '{
-    "client_id": "1", 
-    "game_id": "45",
+    "client_id": "1",
+    "game_id": "funkykingkong", 
     "player_id": "test123",
-    "bet_id": "bonus123",
-    "bet_amount": 1.0,
-    "stone_type": "gold"
+    "bet_id": "spin124",
+    "bet_amount": 0.2,
+    "bet_level": 2
+  }'
+
+# Test level 3 spin
+curl -X POST http://localhost:11401/spin/funkykingkong \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_id": "1",
+    "game_id": "funkykingkong",
+    "player_id": "test123", 
+    "bet_id": "spin125",
+    "bet_amount": 0.3,
+    "bet_level": 3
   }'
 ```
 
 ### Integration Notes
 - **Stateless Design**: No session management required
-- **Unity State Management**: Client handles all boulder progression
-- **Consistent Architecture**: Same structure as Kong slot game
+- **Unity State Management**: Client handles bet level cycling
+- **Consistent Architecture**: Same structure as other games
 - **Shared Services**: Reuses RNG and Settings service clients
 - **Environment Separation**: Production and test environment support
 
 ## Expected Player Experience
 
 ### Typical Game Session
-1. **Boulder Selection**: Player chooses gold boulder, bets 5.0 credits
-2. **First Crush**: Kong swings, boulder doesn't break → Lose 5.0 credits
-3. **Second Crush**: Kong swings, boulder doesn't break → Lose 5.0 credits  
-4. **Third Crush**: Kong swings, boulder breaks → Win 5.0 × 15.6 = 78.0 credits
-5. **Next Boulder**: Player selects new boulder type, process repeats
-6. **Bonus Trigger**: Occasionally get bonus stone selection for extra wins
+1. **Level Selection**: Player clicks "Bet One" to select x1 level
+2. **Bet Amount**: Player chooses 0.1 credits
+3. **First Spin**: Reels spin, no win → Lose 0.1 credits
+4. **Second Spin**: Reels spin, Kong Kong Kong → Win 8.0 credits
+5. **Level Change**: Player clicks "Bet One" to switch to x2 level
+6. **Higher Bet**: Player chooses 0.2 credits for x2 level
+7. **Third Spin**: Reels spin, Sun Sun Sun → Win 16.0 credits
 
 ### Strategic Considerations
-- **Boulder Type Selection**: Balance risk vs reward based on budget
-- **Bet Management**: Consider multiple attempts may be needed per boulder
-- **Bonus Opportunities**: Higher multiplier boulders may trigger more bonuses
+- **Level Selection**: Higher levels offer better payouts but require larger bets
+- **Bet Management**: Balance risk vs reward based on bankroll
+- **Symbol Recognition**: Learn which combinations pay the most
+- **ANY 3X BAR**: Special combination for mixed BAR symbols
 
 ## Monitoring & Analytics
 
 ### Key Metrics to Track
-- **Break Rate per Boulder Type**: Actual vs expected breaking frequency
-- **Average Attempts per Break**: How many crushes typically needed
-- **Multiplier Distribution**: Verify weighted randomization working correctly
-- **Bonus Trigger Rate**: Confirm 10% trigger rate in practice
-- **Player Behavior**: Boulder type preferences and bet patterns
-- **Win/Loss Ratios**: Monitor against expected RTP values
+- **Win Rate per Level**: Actual vs expected win frequency
+- **Bet Level Distribution**: Which levels players prefer
+- **Symbol Distribution**: Verify random generation working correctly
+- **Average Bet Amounts**: Player betting patterns per level
+- **RTP Verification**: Monitor against expected return-to-player values
+- **Session Length**: How long players stay engaged
 
 ### Important Logs
-- **Crush Attempts**: Every boulder crush attempt with outcome
-- **RNG Responses**: All RNG service calls and responses
-- **Bonus Triggers**: When and how bonus games activate
+- **Spin Attempts**: Every spin with bet level and amount
+- **RNG Responses**: All RNG service calls and outcomes
+- **Win/Loss Patterns**: Symbol combinations and payouts
 - **Error Conditions**: API failures and validation errors
-- **Player Patterns**: Betting behavior and boulder selection trends
+- **Player Behavior**: Bet level preferences and betting patterns
+
+## Game Rules Summary
+
+### Core Rules
+- **Single Payline**: Center horizontal line only
+- **Left to Right**: Symbols must match starting from leftmost reel
+- **Adjacent Reels**: Winning combinations must be on adjacent reels
+- **Exact Matches**: Three identical symbols for standard wins
+- **ANY 3X BAR**: Special rule for mixed BAR symbol combinations
+
+### Bet Level System
+- **Three Levels**: x1, x2, x3 paytables
+- **Cycling**: "Bet One" button cycles through levels
+- **Bet Amounts**: Each level has specific valid bet amounts
+- **Payout Scaling**: Higher levels offer better payouts
+
+### Winning Combinations
+- **Kong Kong Kong**: Highest paying combination (800/1600/2500)
+- **Sun Sun Sun**: High value combination (400/800/1200)
+- **Palm Palm Palm**: Medium-high value (200/400/600)
+- **Coconut Coconut Coconut**: Medium value (100/200/300)
+- **Banana Banana Banana**: Medium-low value (80/160/240)
+- **BAR Combinations**: Low value combinations (20-180)
+- **ANY 3X BAR**: Special mixed BAR rule (10/20/30)

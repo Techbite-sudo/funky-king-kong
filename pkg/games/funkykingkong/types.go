@@ -16,12 +16,12 @@ const (
 
 // SpinRequest represents the request body for the /spin endpoint
 type SpinRequest struct {
-	ClientID      string  `json:"client_id"`
-	GameID        string  `json:"game_id"`
-	PlayerID      string  `json:"player_id"`
-	BetID         string  `json:"bet_id"`
-	BetAmount     float64 `json:"bet_amount"`
-	BetMultiplier int     `json:"bet_multiplier"` // 1, 2, or 3 (paytable selection)
+	ClientID  string  `json:"client_id"`
+	GameID    string  `json:"game_id"`
+	PlayerID  string  `json:"player_id"`
+	BetID     string  `json:"bet_id"`
+	BetAmount float64 `json:"bet_amount"`
+	BetLevel  int     `json:"bet_level"` // 1, 2, or 3 (paytable selection)
 }
 
 // SpinResponse represents the response body for the /spin endpoint
@@ -32,5 +32,5 @@ type SpinResponse struct {
 	WinAmount          float64  `json:"win_amount"`
 	WinningCombination string   `json:"winning_combination"`
 	PaytableUsed       int      `json:"paytable_used"`
-	BetMultiplier      int      `json:"bet_multiplier"`
+	BetLevel           int      `json:"bet_level"`
 }

@@ -28,20 +28,20 @@ func (rg *RouteGroup) SpinHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	if !ValidateBetMultiplier(req.BetMultiplier) {
-		log.Printf("Validation error: Invalid bet multiplier %d", req.BetMultiplier)
+	if !ValidateBetLevel(req.BetLevel) {
+		log.Printf("Validation error: Invalid bet level %d", req.BetLevel)
 		return c.Status(fiber.StatusBadRequest).JSON(SpinResponse{
 			Status:  "error",
-			Message: "Invalid bet multiplier, allowed values are 1, 2, 3",
+			Message: "Invalid bet level, allowed values are 1, 2, 3",
 		})
 	}
 
-	if !ValidateBetAmount(req.BetAmount, req.BetMultiplier) {
-		validAmounts := GetValidBetAmounts(req.BetMultiplier)
-		log.Printf("Validation error: Invalid bet amount %f for multiplier %d", req.BetAmount, req.BetMultiplier)
+	if !ValidateBetAmount(req.BetAmount, req.BetLevel) {
+		validAmounts := GetValidBetAmounts(req.BetLevel)
+		log.Printf("Validation error: Invalid bet amount %f for level %d", req.BetAmount, req.BetLevel)
 		return c.Status(fiber.StatusBadRequest).JSON(SpinResponse{
 			Status:  "error",
-			Message: fmt.Sprintf("Invalid bet amount for multiplier x%d, valid amounts: %v", req.BetMultiplier, validAmounts),
+			Message: fmt.Sprintf("Invalid bet amount for level x%d, valid amounts: %v", req.BetLevel, validAmounts),
 		})
 	}
 
@@ -60,10 +60,10 @@ func (rg *RouteGroup) SpinHandler(c *fiber.Ctx) error {
 	log.Printf("Retrieved RTP: %f", rtp)
 
 	// Generate guaranteed winning combination first
-	internalMultiplier := GetInternalMultiplier(req.BetAmount, req.BetMultiplier)
+	internalMultiplier := GetInternalMultiplier(req.BetAmount, req.BetLevel)
 	winningReels := GenerateWinningReels()
-	potentialWin, winCombination := CalculateWin(winningReels, req.BetMultiplier, internalMultiplier)
-	
+	potentialWin, winCombination := CalculateWin(winningReels, req.BetLevel, internalMultiplier)
+
 	// Calculate payout multiplier for RNG
 	payoutMultiplier := 0.0
 	if req.BetAmount > 0 {
@@ -118,8 +118,8 @@ func (rg *RouteGroup) SpinHandler(c *fiber.Ctx) error {
 		Reels:              finalReels,
 		WinAmount:          finalWinAmount,
 		WinningCombination: finalWinCombination,
-		PaytableUsed:       req.BetMultiplier,
-		BetMultiplier:      req.BetMultiplier,
+		PaytableUsed:       req.BetLevel,
+		BetLevel:           req.BetLevel,
 	}
 
 	return c.JSON(response)
